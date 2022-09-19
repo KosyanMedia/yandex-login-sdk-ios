@@ -291,20 +291,15 @@ API_AVAILABLE(ios(13.0))
 - (void)authorizeWithOpenURL:(NSURL *)url isUniversal:(BOOL)isUniversal completionHandler:(void (^)(BOOL success))completion
 {
     UIApplication *application = UIApplication.sharedApplication;
-#ifdef __IPHONE_11_0
-    if (@available(iOS 10_0, *)) {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_10
+    NSDictionary *options = @{ UIApplicationOpenURLOptionUniversalLinksOnly: @(isUniversal) };
+    [application openURL:url options:options completionHandler:completion];
 #else
-    if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+    BOOL result = [application openURL:url];
+    if (completion != NULL) {
+        completion(result);
+    }
 #endif
-        NSDictionary *options = @{ UIApplicationOpenURLOptionUniversalLinksOnly: @(isUniversal) };
-        [application openURL:url options:options completionHandler:completion];
-    }
-    else {
-        BOOL result = [application openURL:url];
-        if (completion != NULL) {
-            completion(result);
-        }
-    }
 }
 
 - (void)authorizeInSafariViewController:(NSURL *)url parentController:(UIViewController*)parentController
